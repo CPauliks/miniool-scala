@@ -69,6 +69,9 @@ object Execute {
   def apply(store: Store)(s: Statement): Cell = s match {
     case Constant(value) => Cell(Left(value))
     case Plus(left, right) => binaryOperation(store, left, right, _+_)
+    case Minus(left, right) => binaryOperation(store, left, right, _-_)
+    case Times(left, right) => binaryOperation(store, left, right, _*_)
+    case Div(left, right) => binaryOperation(store, left, right, _/_)
     case Variable(name) => store(name)
     case Assignment(left, right) => {
       val lvalue = apply(store)(left)
@@ -84,6 +87,16 @@ object Execute {
         gvalue = apply(store)(guard)
       }
       Cell.NULL
+    }
+    case If(guard, thenBranch, elseBranch) => {
+      val gvalue = apply(store)(guard)
+      if (gvalue.get.isRight || gvalue.get.left.get != 0) {
+        apply(store)(thenBranch)
+      }
+      else {
+        apply(store)(elseBranch)
+      }
+      
     }
     case New(Clazz(zuper, fields, methods)) => {
       // create an object based on the list of field names and methods
