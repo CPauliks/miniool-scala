@@ -50,13 +50,37 @@ case class Instance(zuper: Option[Instance], fields: Map[String, Cell], methods:
   require(methods != null)
   require(! methods.contains(null))
 
-  def getField(name: String): Cell =
-  // TODO: your job: replace this result with a meaningful field lookup
-	Cell(0)
+  def getField(name: String): Cell = {
+    //See if the class contains the requested field
+    //If not, look for the the field in the superclasses
+    //Recursively move up the inheritance chain
+    //Stop as soon as you find a match and return it
+    //If you reach the top, return 0.
+    fields.get(name) match {
+      case Some(cell: Cell) => cell
+      case None => zuper match {
+        case Some(parent: Instance) => parent.getField(name)
+        case None => Cell.NULL
+      }
+    }
+    
+  }
 
-  def getScopedMethod(name: String): ScopedMethod =
-  // TODO: your job: replace this result with a meaningful method lookup
-	(Instance(None, Map(), Map()), (Seq(), Constant(0)))
+  def getScopedMethod(name: String): ScopedMethod = {
+    //See if the class contains the requested method
+    //If not, look for the the method in the superclasses
+    //Recursively move up the inheritance chain
+    //Stop as soon as you find a match and return with the current class
+    //If you reach the top, return an empty method of an empty object
+    methods.get(name) match {
+      case Some(method: Method) => (this, method)
+      case None => zuper match {
+        case Some(parent: Instance) => parent.getScopedMethod(name)
+        case None => (Instance(None, Map(), Map()), (Seq(), Constant(0)))
+      }
+    }
+  }
+	
 }
 
 /**

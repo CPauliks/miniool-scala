@@ -22,7 +22,28 @@ class TestMyInt extends TestCase with AssertionsForJUnit {
  *         result.init(value + that);
  *         return result;
  *     }
- *     // TODO your job: implement the missing methods (minus, uminus, times, intValue)
+ *     intValue() { // returns an Integer
+ *     		return this.value;
+ *     }
+ *     minus(that) { // returns a myInt
+ *     		local result;
+ *     		result = new myInt;
+ *     		result.init(this.intvalue() - that)
+ *     		return result;
+ *     }
+ *     uminus() { // returns a myInt
+ *     		local result;
+ *     		result = new myInt;
+ *     		result.init(0 - this.intvalue())
+ *     		return result;
+ *     }
+ *     times(that) { // returns a myInt
+ *     		local result;
+ *     		result = new myInt;
+ *     		result.init(this.itimes(that))
+ *     		return result;
+ *     }
+ *     
  * }
  */
 
@@ -43,9 +64,29 @@ val MyInt: Clazz = new Clazz(
     	Assignment(Variable("result"), New(MyInt)),
     	Message(Variable("result"), "init", Plus(Selection(Variable("this"), "value"), Variable("0"))),
     	Variable("result")
+    )),
+    "intValue" -> (Seq(),
+        Sequence(
+            Selection(Variable("this"),"value")
+    )),
+    "minus" -> (Seq("result"),
+        Sequence(
+            Assignment(Variable("result"), New(MyInt)),
+            Message(Variable("result"), "init", Minus(Message(Variable("this"), "intValue"), Variable("0"))),
+            Variable("result")        
+    )),
+    "uminus" -> (Seq("result"),
+        Sequence(
+            Assignment(Variable("result"), New(MyInt)),
+            Message(Variable("result"), "init", Minus(Constant(0), Message(Variable("this"), "intValue"))),
+            Variable("result")        
+    )),
+    "times" -> (Seq("result"),
+        Sequence(
+            Assignment(Variable("result"), New(MyInt)),
+            Message(Variable("result"), "init", Message(Variable("this"), "itimes", Variable("0"))),
+            Variable("result")        
     ))
-    // TODO your job: implement the remaining methods
-    // hint: use "itimes" to implement "times"
   ))
 
   /*
@@ -75,9 +116,20 @@ val MyInt: Clazz = new Clazz(
     Assignment(Variable("z"), New(MyInt)),
     Message(Variable("z"), "init", Constant(6)),
     Assignment(Variable("u"), Message(Variable("z"), "itimes", Constant(8))),
-    // TODO your job: replace the assignment to v by the following one:
-    // v = z.minus(10).times(4).uminus().times(3).minus(7).intValue();
-    Assignment(Variable("v"), Constant(0))
+    Assignment(Variable("v"),
+        Message(
+            Message(
+                Message(
+                    Message(
+                        Message(
+                            Message(
+                                Variable("z"), "minus", Constant(10))
+                            , "times", Constant(4))
+                        , "uminus")
+                    , "times", Constant(3))
+                , "minus", Constant(7))
+            , "intValue")
+            )
   )
 
   def testMain() {
